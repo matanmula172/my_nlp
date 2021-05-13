@@ -1,5 +1,6 @@
 import nltk
 from transformers import AutoTokenizer
+from nltk.corpus import stopwords
 import spacy
 
 
@@ -25,7 +26,19 @@ def encode_huggingface_transformer(text):
     tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
     return tokenizer.encode(text)
 
-# bla
+
 def decode_huggingface_transformer(encoded_text):
     tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
     return tokenizer.decode(encoded_text)
+
+
+def remove_stop_words(text):
+    stop_words = set(stopwords.words('english'))
+    tokenized_text = tokenize_text(text)
+    new_text = []
+    for token in tokenized_text:
+        if token not in stop_words:
+            new_text.append(token)
+
+    return " ".join(new_text)
+
