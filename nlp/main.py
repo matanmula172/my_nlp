@@ -1,12 +1,12 @@
 import nltk
-from transformers import AutoTokenizer
-from nltk.stem import PorterStemmer
+import pandas as pd
 import spacy
+from nltk.stem import PorterStemmer
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 from textblob import TextBlob
+from transformers import AutoTokenizer
 
-# nltk.download('punkt')
-# nltk.download('stop')
-# nltk.download('stopwords')
 nlp = spacy.load("en_core_web_sm")
 
 
@@ -84,5 +84,22 @@ def semantic_word_similarity(word1, word2):
     return nlp(word1).similarity(nlp(word2))
 
 
+# get text similarity using cosine similarity
 def text_similarity(text1, text2):
     return nlp(text1).similarity(nlp(text2))
+
+
+# get similarity matrix using cosine similarity
+def similarity_matrix(document_lst):
+    # (sentence_index, feature_index) count
+    vectorizer = CountVectorizer()
+    matrix = vectorizer.fit_transform(document_lst)
+
+    # Obtaining the document-word matrix
+    doc_term_matrix = matrix.todense()
+
+    # Converting matrix to dataframe
+    df = pd.DataFrame(doc_term_matrix)
+
+    # Computing cosine similarity
+    return cosine_similarity(df, df)
