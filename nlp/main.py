@@ -1,11 +1,16 @@
 import nltk
 import pandas as pd
+import numpy as np
 import spacy
+from gensim import corpora
+from gensim.matutils import softcossim
+from gensim.utils import simple_preprocess
 from nltk.stem import PorterStemmer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from textblob import TextBlob
 from transformers import AutoTokenizer
+import gensim.downloader as api
 
 nlp = spacy.load("en_core_web_sm")
 
@@ -103,3 +108,23 @@ def similarity_matrix(document_lst):
 
     # Computing cosine similarity
     return cosine_similarity(df, df)
+
+
+def soft_cosine_similarity(document_lst):
+    # Prepare a dictionary and a corpus.
+    dictionary = corpora.Dictionary([simple_preprocess(doc) for doc in document_lst])
+
+    # load corpus to fit project
+    fasttext_model300 = api.load('fasttext-wiki-news-subwords-300')
+    # Prepare the similarity matrix
+    sim_matrix = fasttext_model300.similarity_matrix(dictionary, tfidf=None, threshold=0.0, exponent=2.0,
+                                                            nonzero_limit=100)
+    dictionary_vec = []
+    for dic in document_lst:
+        dictionary_vec.append(dictionary.doc2bow(simple_preprocess(dic)))
+
+    len_array = np.arange(len(dictionary_vec))
+    xx, yy = np.meshgrid(len_array, len_array)
+    cosine_sim_mat = pd.DataFrame([[round(softcossim(dictionary_vec[i],dictionary_vec[j], sim_matrix) ,2) for i, j in zip(x,y)] for y, x in zip(xx, yy)])
+    return cosine_sim_mat
+
