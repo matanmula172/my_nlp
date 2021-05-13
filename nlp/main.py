@@ -25,7 +25,7 @@ def encode_huggingface_transformer(text):
     tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
     return tokenizer.encode(text)
 
-
+# bla
 def decode_huggingface_transformer(encoded_text):
     tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
     return tokenizer.decode(encoded_text)
