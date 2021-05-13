@@ -4,7 +4,6 @@ from nltk.stem import PorterStemmer
 import spacy
 from textblob import TextBlob
 
-
 # nltk.download('punkt')
 # nltk.download('stop')
 # nltk.download('stopwords')
@@ -79,3 +78,11 @@ def get_n_most_frequent_words(text, n, is_stop_words=False):
 def text_correction(text):
     text = TextBlob(text)
     return text.correct()
+
+
+def semantic_word_similarity(word1, word2):
+    return nlp(word1).similarity(nlp(word2))
+
+
+def text_similarity(text1, text2):
+    return nlp(text1).similarity(nlp(text2))
