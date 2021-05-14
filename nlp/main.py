@@ -11,6 +11,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from textblob import TextBlob
 from transformers import AutoTokenizer
 import gensim.downloader as api
+import language_tool_python
 
 nlp = spacy.load("en_core_web_sm")
 
@@ -131,3 +132,12 @@ def soft_cosine_similarity(document_lst):
         [[round(softcossim(dictionary_vec[i], dictionary_vec[j], sim_matrix), 2) for i, j in zip(x, y)] for y, x in
          zip(xx, yy)])
     return cosine_sim_mat
+
+
+# returns errors and how to correct them in a sentence
+# error_id examples: UPPERCASE_SENTENCE_START, TOO_TO, EN_A_VS_AN, ENGLISH_WORD_REPEAT_RULE..
+# https://predictivehacks.com/languagetool-grammar-and-spell-checker-in-python/#:~:text=LanguageTool%20is%20an%20open%2Dsource,through%20a%20command%2Dline%20interface.
+# TODO: make this function faster
+def language_checker(sentence):
+    tool = language_tool_python.LanguageTool('en-US')
+    return tool.check(sentence)
