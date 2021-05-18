@@ -8,6 +8,8 @@ from gensim.utils import simple_preprocess
 from nltk.stem import PorterStemmer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.decomposition import TruncatedSVD
 from textblob import TextBlob
 from transformers import AutoTokenizer
 import gensim.downloader as api
@@ -113,6 +115,7 @@ def similarity_matrix(document_lst):
 
 # Soft cosine similarity is similar to cosine similarity but in addition considers the semantic relationship between
 # the words through its vector representation.
+# TODO: learn more about soft cosine theory
 def soft_cosine_similarity(document_lst):
     # Prepare a dictionary and a corpus.
     dictionary = corpora.Dictionary([simple_preprocess(doc) for doc in document_lst])
@@ -137,7 +140,40 @@ def soft_cosine_similarity(document_lst):
 # returns errors and how to correct them in a sentence
 # error_id examples: UPPERCASE_SENTENCE_START, TOO_TO, EN_A_VS_AN, ENGLISH_WORD_REPEAT_RULE..
 # https://predictivehacks.com/languagetool-grammar-and-spell-checker-in-python/#:~:text=LanguageTool%20is%20an%20open%2Dsource,through%20a%20command%2Dline%20interface.
-# TODO: make this function faster
+# TODO: make this function faster (by checking specifically if the grammar is correct)
 def language_checker(sentence):
     tool = language_tool_python.LanguageTool('en-US')
     return tool.check(sentence)
+
+
+def get_synonym(word):
+    # Load the pretrained google news word2vec model
+    word2vec_model300 = api.load('word2vec-google-news-300')
+    # Using most_similar() function
+    return word2vec_model300.most_similar(word)
+
+
+# TODO: learn
+def word_mover_distance():
+    pass
+
+
+def get_text_topic_key_words(text_lst):
+    topic_dict = dict()
+    vectorizer = TfidfVectorizer(stop_words='english', max_features=1000, smooth_idf=True)
+    matrix = vectorizer.fit_transform(text_lst)
+    SVD_model = TruncatedSVD(n_components=10, algorithm='randomized', n_iter=100, random_state=122)
+    SVD_model.fit(matrix)
+    terms = vectorizer.get_feature_names()
+    # Iterating through each topic
+    for i, comp in enumerate(SVD_model.components_):
+        terms_comp = zip(terms, comp)
+        # sorting the 7 most important terms
+        sorted_terms = sorted(terms_comp, key=lambda x: x[1], reverse=True)[:7]
+        # printing the terms of a topic
+        for t in sorted_terms:
+            if i not in topic_dict:
+                topic_dict[i] = t[0] + ' '
+            else:
+                topic_dict[i] += t[0] + ' '
+    return topic_dict
